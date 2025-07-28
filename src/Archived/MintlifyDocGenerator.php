@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Cognesy\Doctor\Docgen;
+namespace Cognesy\Doctor\Archived;
 
 use Cognesy\Auxiliary\Mintlify\MintlifyIndex;
 use Cognesy\Auxiliary\Mintlify\NavigationGroup;
@@ -177,8 +177,6 @@ class MintlifyDocGenerator
     }
 
     private function inlineExternalCodeblocks(string $targetPath, string $subpackage) : void {
-        $examplesPath = BasePath::get("codeblocks");
-
         // inline example code blocks
         $docFiles = array_merge(
             glob("$targetPath/*.mdx"),
@@ -191,13 +189,13 @@ class MintlifyDocGenerator
         foreach ($docFiles as $docFile) {
             $this->view->renderInlinedItem($docFile, $subpackage);
             $content = file_get_contents(realpath($docFile));
-            $markdown = MarkdownFile::fromString($content);
+            $markdown = MarkdownFile::fromString($content, realpath($docFile));
             if (!$markdown->hasCodeBlocks()) {
                 $this->view->renderInlinedResult('skip');
                 continue;
             }
             try {
-                $newMarkdown = $this->tryInline($markdown, $examplesPath);
+                $newMarkdown = $this->tryInline($markdown);
                 if ($newMarkdown === null) {
                     // no code blocks were replaced, skip this file
                     $this->view->renderInlinedResult('skip');
@@ -215,18 +213,22 @@ class MintlifyDocGenerator
         }
     }
 
-    private function tryInline(MarkdownFile $markdown, string $examplesPath) : ?MarkdownFile {
+    private function tryInline(MarkdownFile $markdown) : ?MarkdownFile {
         $madeReplacements = false;
+        $markdownDir = dirname($markdown->path());
 
-        $newMarkdown = $markdown->withReplacedCodeBlocks(function(CodeBlockNode $codeblock) use ($examplesPath, &$madeReplacements) {
+        $newMarkdown = $markdown->withReplacedCodeBlocks(function(CodeBlockNode $codeblock) use ($markdownDir, &$madeReplacements) {
             $includePath = $codeblock->metadata('include');
             if (empty($includePath)) {
                 return $codeblock;
             }
             $includeDir = trim($includePath, '\'"'); // remove quotes
-            $path = $examplesPath . '/' . $includeDir;
+            
+            // Resolve path relative to markdown file
+            $path = $markdownDir . '/' . ltrim($includeDir, './');
+            
             if (!file_exists($path)) {
-                throw new \Exception("Codeblock include file '$path' does not exist");
+                throw new \Exception("Codeblock include file '$path' does not exist (resolved from markdown: {$markdown->path()})");
             }
             $content = file_get_contents($path);
             if ($content === false) {

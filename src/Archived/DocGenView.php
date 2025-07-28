@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Cognesy\Doctor\Docgen;
+namespace Cognesy\Doctor\Archived;
 
 use Cognesy\InstructorHub\Core\Cli;
 use Cognesy\InstructorHub\Data\Example;
