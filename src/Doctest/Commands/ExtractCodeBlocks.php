@@ -47,6 +47,7 @@ class ExtractCodeBlocks extends Command
         $this->eventDispatcher->addListener(ExtractionCompleted::class, fn($e) => $this->metricsCollector->handle($e));
     }
 
+    #[\Override]
     protected function configure(): void {
         $this
             ->addOption(
@@ -88,6 +89,7 @@ class ExtractCodeBlocks extends Command
             );
     }
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int {
         $io = new SymfonyStyle($input, $output);
 
@@ -100,10 +102,10 @@ class ExtractCodeBlocks extends Command
             $modifySource = $input->getOption('modify-source');
 
             // Validate input
-            if (!$sourcePath && !$sourceDir) {
+            if (empty($sourcePath) && empty($sourceDir)) {
                 throw new InvalidArgumentException('Either --source or --source-dir must be specified.');
             }
-            if ($sourcePath && $sourceDir) {
+            if (!empty($sourcePath) && !empty($sourceDir)) {
                 throw new InvalidArgumentException('Cannot specify both --source and --source-dir.');
             }
 
@@ -198,7 +200,7 @@ class ExtractCodeBlocks extends Command
                 $plannedRegions = $plannedById[$doctest->id]->regions ?? [];
                 foreach ($plannedRegions as $plannedRegion) {
                     $regionName = $plannedRegion->name;
-                    $regionOutputPath = $plannedRegion->path ?? $this->determineRegionOutputPath($doctest, $regionName, $targetDir);
+                    $regionOutputPath = $plannedRegion->path;
                     $this->ensureDirectoryExists(dirname($regionOutputPath));
 
                     $this->docRepository->writeFile($regionOutputPath, $doctest->toFileContent($regionName));
@@ -347,6 +349,7 @@ class ExtractCodeBlocks extends Command
         return Path::join($markdownDir, ltrim($doctest->codePath, './'));
     }
 
+    /** @phpstan-ignore-next-line */
     private function determineRegionOutputPath(DoctestFile $doctest, string $regionName, ?string $targetDir): string {
         $pathInfo = pathinfo($doctest->codePath);
         $baseFilename = $pathInfo['filename'] ?? '';
@@ -487,6 +490,7 @@ class ExtractCodeBlocks extends Command
 
     /**
      * Normalize path separators to system-appropriate ones
+     * @phpstan-ignore-next-line
      */
     private function normalizePath(string $path): string {
         // Replace both forward and backward slashes with system separator

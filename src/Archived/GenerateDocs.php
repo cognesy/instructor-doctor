@@ -31,6 +31,7 @@ class GenerateDocs extends Command
         parent::__construct();
     }
 
+    #[\Override]
     protected function configure(): void {
         $this
             ->setName('gen')
@@ -40,13 +41,14 @@ class GenerateDocs extends Command
             ->addOption('packages', 'p', InputOption::VALUE_NONE, 'Generate only package documentation');
     }
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int {
         $examplesOnly = $input->getOption('examples');
         $packagesOnly = $input->getOption('packages');
         $timeStart = microtime(true);
 
         // Determine which docs to generate
-        if ($examplesOnly && $packagesOnly) {
+        if ((bool) $examplesOnly && (bool) $packagesOnly) {
             Cli::outln("Error: Cannot specify both --examples and --packages options.", [Color::BOLD, Color::RED]);
             return Command::FAILURE;
         }

@@ -4,6 +4,7 @@ namespace Cognesy\Doctor\Freeze\Execution;
 
 class ShellExecutor implements CommandExecutorInterface
 {
+    #[\Override]
     public function execute(array $commandArray, string $commandString): ExecutionResult
     {
         // Use shell_exec for a different approach
@@ -28,7 +29,8 @@ class ShellExecutor implements CommandExecutorInterface
         }
 
         // Check if the command was successful by looking at the output
-        $success = !str_contains($result, 'ERROR') && !str_contains($result, 'error:');
+        $resultStr = $result !== false ? $result : '';
+        $success = !str_contains($resultStr, 'ERROR') && !str_contains($resultStr, 'error:');
 
         return new ExecutionResult(
             success: $success,

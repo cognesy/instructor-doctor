@@ -10,10 +10,14 @@ use Cognesy\Doctor\Markdown\Nodes\Node;
 
 final class ReplaceCodeBlockByCallable implements NodeVisitor
 {
+    /**
+     * @param \Closure(CodeBlockNode): CodeBlockNode $replacer
+     */
     public function __construct(
         private Closure $replacer,
     ) {}
 
+    #[\Override]
     public function visit(Node $node): Node {
         return match(true) {
             $node instanceof DocumentNode => $this->visitDocument($node),

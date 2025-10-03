@@ -31,6 +31,7 @@ class GenerateMkDocsCommand extends Command
         parent::__construct();
     }
 
+    #[\Override]
     protected function configure(): void {
         $this
             ->addOption(
@@ -47,6 +48,7 @@ class GenerateMkDocsCommand extends Command
             );
     }
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int {
         $timeStart = microtime(true);
         $view = new MkDocsGenerationView();
@@ -71,7 +73,7 @@ class GenerateMkDocsCommand extends Command
 
         if ($packagesOnly) {
             $result = $this->generatePackagesOnly($documentation, $view);
-        } elseif ($examplesOnly) {
+        } elseif (!empty($examplesOnly)) {
             $result = $this->generateExamplesOnly($documentation, $view);
         } else {
             $result = $this->generateAll($documentation, $view);
@@ -156,7 +158,7 @@ class GenerateMkDocsCommand extends Command
         return $result;
     }
 
-    private function renderSuccess($result, float $totalTime): void {
+    private function renderSuccess(mixed $result, float $totalTime): void {
         Cli::outln(
             sprintf("Done in %.2fs", $totalTime),
             [Color::BOLD, Color::YELLOW],

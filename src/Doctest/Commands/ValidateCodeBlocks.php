@@ -51,6 +51,7 @@ class ValidateCodeBlocks extends Command
         );
     }
 
+    #[\Override]
     protected function configure(): void {
         $this
             ->addOption(
@@ -92,6 +93,7 @@ class ValidateCodeBlocks extends Command
             );
     }
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int {
         $io = new SymfonyStyle($input, $output);
 
@@ -104,10 +106,10 @@ class ValidateCodeBlocks extends Command
             $showPaths = $input->getOption('show-paths');
 
             // Validate input
-            if (!$sourcePath && !$sourceDir) {
+            if (empty($sourcePath) && empty($sourceDir)) {
                 throw new InvalidArgumentException('Either --source or --source-dir must be specified.');
             }
-            if ($sourcePath && $sourceDir) {
+            if (!empty($sourcePath) && !empty($sourceDir)) {
                 throw new InvalidArgumentException('Cannot specify both --source and --source-dir.');
             }
 
@@ -119,7 +121,7 @@ class ValidateCodeBlocks extends Command
                 }
                 $result = $this->processFileWithTiming($sourcePath);
                 $results = [$result];
-                if ($verbose && $result->totalBlocks === 0) {
+                if (!empty($verbose) && $result->totalBlocks === 0) {
                     $io->writeln("  No extracted code blocks found");
                 }
                 if ($showPaths) {
@@ -150,6 +152,9 @@ class ValidateCodeBlocks extends Command
         }
     }
 
+    /**
+     * @param array<ValidationResult> $results
+     */
     private function displayResults(array $results, bool $showAll, SymfonyStyle $io): void
     {
         if (empty($results)) {

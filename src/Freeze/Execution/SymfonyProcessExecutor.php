@@ -6,10 +6,14 @@ use Symfony\Component\Process\Process;
 
 class SymfonyProcessExecutor implements CommandExecutorInterface
 {
+    #[\Override]
     public function execute(array $commandArray, string $commandString): ExecutionResult
     {
         $process = new Process($commandArray);
-        $process->setWorkingDirectory(getcwd());
+        $cwd = getcwd();
+        if ($cwd !== false) {
+            $process->setWorkingDirectory($cwd);
+        }
         $process->run();
 
         return new ExecutionResult(

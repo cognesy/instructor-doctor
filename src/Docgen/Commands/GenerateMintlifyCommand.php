@@ -33,6 +33,7 @@ class GenerateMintlifyCommand extends Command
         parent::__construct();
     }
 
+    #[\Override]
     protected function configure(): void {
         $this
             ->addOption(
@@ -49,6 +50,7 @@ class GenerateMintlifyCommand extends Command
             );
     }
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int {
         $timeStart = microtime(true);
         $view = new PackageGenerationView();
@@ -73,7 +75,7 @@ class GenerateMintlifyCommand extends Command
 
         if ($packagesOnly) {
             $result = $this->generatePackagesOnly($documentation, $view);
-        } elseif ($examplesOnly) {
+        } elseif (!empty($examplesOnly)) {
             $result = $this->generateExamplesOnly($documentation, $view);
         } else {
             $result = $this->generateAll($documentation, $view);
@@ -163,7 +165,7 @@ class GenerateMintlifyCommand extends Command
         return $documentation->generateExampleDocs();
     }
 
-    private function renderSuccess($result, float $totalTime): void {
+    private function renderSuccess(mixed $result, float $totalTime): void {
         Cli::outln("✓ Mintlify Documentation Generation Complete", [Color::BOLD, Color::GREEN]);
         Cli::outln(
             sprintf("Done in %.2fs", $totalTime),
